@@ -48,13 +48,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(request -> {
-                var config = new org.springframework.web.cors.CorsConfiguration();
-                config.addAllowedOriginPattern("*");
-                config.addAllowedMethod("*");
-                config.addAllowedHeader("*");
-                config.setAllowCredentials(true);
-                return config;
-            }))
+    var config = new org.springframework.web.cors.CorsConfiguration();
+    config.addAllowedOrigin("https://job-tracker-app.onrender.com");
+    config.addAllowedOriginPattern("https://*.onrender.com");
+    config.addAllowedOriginPattern("http://localhost:*");
+    config.addAllowedMethod("*");
+    config.addAllowedHeader("*");
+    config.setAllowCredentials(true);
+    return config;
+}))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
