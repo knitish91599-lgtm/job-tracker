@@ -1,15 +1,40 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: jobtracker-postgres
+    environment:
+      POSTGRES_DB: jobtracker
+      POSTGRES_USER: jobuser
+      POSTGRES_PASSWORD: JobTracker2026Secure!
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobuser -d jobtracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build: ./backend
     container_name: jobtracker-backend
     ports:
       - "8080:8080"
-    volumes:
-      - db-data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      - SPRING_PROFILES_ACTIVE=default
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobtracker
+      SPRING_DATASOURCE_USERNAME: jobuser
+      SPRING_DATASOURCE_PASSWORD: JobTracker2026Secure!
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_H2_CONSOLE_ENABLED: "false"
     restart: unless-stopped
 
   frontend:
@@ -22,5 +47,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  db-data:
+  pgdata:
     driver: local
